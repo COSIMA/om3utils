@@ -1,7 +1,7 @@
 import pytest
 import filecmp
 
-from utils import MockFile
+from test_utils import MockFile
 from om3utils.payu_config_yaml import read_payu_config_yaml, write_payu_config_yaml
 
 

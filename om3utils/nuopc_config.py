@@ -71,45 +71,7 @@ The CESM driver then uses tables as defined in Resource Files to store Fortran N
 from pathlib import Path
 import re
 
-
-def _convert_from_string(value: str):
-    """Tries to convert a string to the most appropriate type. Leaves it unchanged if conversion does not succeed.
-
-    Note that booleans use the Fortran syntax and real numbers in double precision can use the "old" Fortran `D`
-    delimiter.
-    """
-    # Start by trying to convert from a Fortran logical to a Python bool
-    if value.lower() == ".true.":
-        return True
-    elif value.lower() == ".false.":
-        return False
-    # Next try to convert to integer or float
-    for conversion in [
-        lambda: int(value),
-        lambda: float(value),
-        lambda: float(value.replace("D", "e")),
-    ]:
-        try:
-            out = conversion()
-        except ValueError:
-            continue
-        return out
-    # None of the above succeeded, so just return the string
-    return value
-
-
-def _convert_to_string(value) -> str:
-    """Convert a value to a string.
-
-    Note that booleans are converted using the Fortran syntax and real numbers in double precision use the "old" Fortran
-     `D` delimiter for backward compatibility.
-    """
-    if isinstance(value, bool):
-        return ".true." if value else ".false."
-    elif isinstance(value, float):
-        return "{:e}".format(value).replace("e", "D")
-    else:
-        return str(value)
+from om3utils.utils import convert_from_string, convert_to_string
 
 
 def read_nuopc_config(file_name: str) -> dict:
@@ -145,7 +107,7 @@ def read_nuopc_config(file_name: str) -> dict:
                     else:
                         match = re.match(assignment_pattern, line)
                         if match:
-                            table[match.group(1)] = _convert_from_string(match.group(2))
+                            table[match.group(1)] = convert_from_string(match.group(2))
                         else:
                             raise ValueError(
                                 f"Line: {line} in file {file_name} is not a valid NUOPC configuration specification"
@@ -159,7 +121,7 @@ def read_nuopc_config(file_name: str) -> dict:
 
                 elif re.match(label_value_pattern, line):
                     match = re.match(label_value_pattern, line)
-                    config[match.group(1)] = [_convert_from_string(string) for string in match.group(2).split()]
+                    config[match.group(1)] = [convert_from_string(string) for string in match.group(2).split()]
 
     return config
 
@@ -176,7 +138,7 @@ def write_nuopc_config(config: dict, file: Path):
             if isinstance(item, dict):
                 stream.write(key + "::\n")
                 for label, value in item.items():
-                    stream.write("  " + label + " = " + _convert_to_string(value) + "\n")
+                    stream.write("  " + label + " = " + convert_to_string(value) + "\n")
                 stream.write("::\n\n")
             else:
-                stream.write(key + ": " + " ".join(map(_convert_to_string, item)) + "\n")
+                stream.write(key + ": " + " ".join(map(convert_to_string, item)) + "\n")

@@ -1,7 +1,7 @@
 import pytest
 import filecmp
 
-from utils import MockFile
+from test_utils import MockFile
 from om3utils.nuopc_config import read_nuopc_config, write_nuopc_config
 
 

@@ -1,7 +1,7 @@
 import pytest
 import filecmp
 
-from utils import MockFile
+from test_utils import MockFile
 from om3utils.mom6_input import Mom6Input, write_mom6_input, read_mom6_input
 
 
