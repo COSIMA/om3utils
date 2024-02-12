@@ -36,3 +36,8 @@ def convert_to_string(value) -> str:
         return "{:e}".format(value).replace("e", "D")
     else:
         return str(value)
+
+
+def nano_to_sec(nanos):
+    """Convert nanoseconds to seconds."""
+    return nanos / (1000 * 1000 * 1000)
