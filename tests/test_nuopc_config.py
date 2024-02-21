@@ -56,6 +56,19 @@ ALLCOMP_attributes::
     return MockFile(file, resource_file_str)
 
 
+@pytest.fixture()
+def invalid_nuopc_config_file(tmp_path):
+    file = tmp_path / "invalid_config_file"
+    resource_file_str = """DRIVER_attributes::
+  Verbosity: off
+  cime_model - cesm
+::
+
+COMPONENTS::: atm ocn
+"""
+    return MockFile(file, resource_file_str)
+
+
 def test_read_nuopc_config(tmp_path, simple_nuopc_config, simple_nuopc_config_file):
     config_from_file = read_nuopc_config(file_name=simple_nuopc_config_file.file)
 
@@ -67,3 +80,13 @@ def test_write_nuopc_config(tmp_path, simple_nuopc_config, simple_nuopc_config_f
     write_nuopc_config(simple_nuopc_config, file)
 
     assert filecmp.cmp(file, simple_nuopc_config_file.file)
+
+
+def test_read_invalid_nuopc_config_file(tmp_path, invalid_nuopc_config_file):
+    with pytest.raises(ValueError):
+        read_nuopc_config(file_name=invalid_nuopc_config_file.file)
+
+
+def test_read_missing_nuopc_config_file():
+    with pytest.raises(FileNotFoundError):
+        read_nuopc_config(file_name="garbage")

@@ -125,3 +125,8 @@ def test_round_trip_payu_config(tmp_path, complex_payu_config_file, modified_pay
     write_payu_config_yaml(config, tmp_path / "config.yaml")
 
     assert filecmp.cmp(tmp_path / "config.yaml", modified_payu_config_file.file)
+
+
+def test_read_missing_payu_config():
+    with pytest.raises(FileNotFoundError):
+        read_payu_config_yaml(file_name="garbage")

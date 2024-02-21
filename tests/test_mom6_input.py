@@ -93,7 +93,16 @@ def test_write_mom6_input(tmp_path, simple_mom6_input, simple_mom6_input_file):
 def test_round_trip_mom6_input(tmp_path, complex_mom6_input_file, modified_mom6_input_file):
     mom6_input_from_file = Mom6Input(file_name=complex_mom6_input_file.file)
     mom6_input_from_file["dt"] = 900.0
+    mom6_input_from_file["ADDED_VAR"] = 1
+    del mom6_input_from_file["ADDED_VAR"]
     mom6_input_from_file["ADDED_VAR"] = 32
+
     write_mom6_input(mom6_input_from_file, tmp_path / "MOM_input_new")
 
+    assert mom6_input_from_file["ADDED_VAR"] == 32
     assert filecmp.cmp(tmp_path / "MOM_input_new", modified_mom6_input_file.file)
+
+
+def test_read_missing_mom6_file():
+    with pytest.raises(FileNotFoundError):
+        Mom6Input(file_name="garbage")
