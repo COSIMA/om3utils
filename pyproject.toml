@@ -36,6 +36,9 @@ test = [
 addopts = ["--cov=om3utils", "--cov-report=term", "--cov-report=xml"]
 testpaths = ["tests"]
 
+[tool.coverage.run]
+omit = ["om3utils/__init__.py", "om3utils/_version.py"]
+
 [tool.black]
 line-length = 120
 
