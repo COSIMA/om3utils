@@ -85,10 +85,7 @@ def read_nuopc_config(file_name: str) -> dict:
 
                 elif re.match(label_value_pattern, line):
                     match = re.match(label_value_pattern, line)
-                    if len(match.group(2).split()) > 1:
-                        config[match.group(1)] = [_convert_from_string(string) for string in match.group(2).split()]
-                    else:
-                        config[match.group(1)] = _convert_from_string(match.group(2))
+                    config[match.group(1)] = [_convert_from_string(string) for string in match.group(2).split()]
 
     return config
 
