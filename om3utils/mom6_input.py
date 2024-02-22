@@ -1,4 +1,4 @@
-"""MOM6 input
+"""Utilities to handle MOM6 parameter files.
 
 The MOM6 parameter file format is described here:
 
@@ -33,8 +33,8 @@ Similarly, to get write a Python dictionary as a MOM6 parameter file, one requir
 We then have utility functions to convert from one representation to another:
   - nml_str -> mom6_input (_nml_str_to_mom6_input)
   - mom6_input -> nml_str (_mom6_input_to_nml_str)
-  - mom6_input_str -> nml_str (_mom6_input_str_to_nml_str + patch_mom6_input_str)
-  - nml_str -> mom6_input_str (_nml_str_to_mom6_input_str + unpatch_mom6_input_str)
+  - mom6_input_str -> nml_str (_mom6_input_str_to_nml_str + _patch_mom6_input_str)
+  - nml_str -> mom6_input_str (_nml_str_to_mom6_input_str + _unpatch_mom6_input_str)
 
 For round-trip parsing, one needs to keep track of the changes done to the file to make it a conforming Fortran
 namelist and then undo those changes. Since we use the f90mnml parser ability to patch a file as it is read, we also
@@ -67,10 +67,12 @@ def _patch_mom6_input_str(mom6_input_str: str) -> tuple[str, dict]:
     The changes are recorded as a "patch", which is a dictionary: the keys are the line numbers where changes
     were made, while the values are tuples containing a keyword describing the type of change and, optionally, a string.
 
-    :param mom6_input_str:
-    :return:
-    """
+    Args:
+        mom6_input_str (str): Contents of the MOM6 parameter file to patch.
 
+    Returns:
+        tuple: Contents of the patched MOM6 parameter file and the patch that was applied.
+    """
     # Define several patterns that need to be matched
     comment_pattern = re.compile(r"/\*.*?\*/", flags=re.DOTALL)
     zstar_pattern = re.compile(r"Z\*")
@@ -116,11 +118,14 @@ def _patch_mom6_input_str(mom6_input_str: str) -> tuple[str, dict]:
 
 
 def _unpatch_mom6_input_str(mom6_input_str: str, patch: dict = None) -> str:
-    """Undo the changes that were done to a MOM6 parameter file to make it into a conforming Fortran namelist
+    """Undo the changes that were done to a MOM6 parameter file to make it into a conforming Fortran namelist.
 
-    :param mom6_input_str:
-    :param patch:
-    :return:
+    Args:
+        mom6_input_str (str): Contents of the MOM6 parameter file to unpatch.
+        patch (dict):  A dict containing the patch to revert.
+
+    Returns:
+        str: Unpatched contents of the MOM6 parameter  file.
     """
     output = ""
     lines = mom6_input_str.split("\n")[1:-2]
@@ -144,19 +149,25 @@ def _unpatch_mom6_input_str(mom6_input_str: str, patch: dict = None) -> str:
 
 
 def _mom6_input_str_to_nml_str(mom6_input_str: str) -> str:
-    """
+    """Convert the MOM6 parameter file to a conforming Fortran namelist.
 
-    :param mom6_input_str:
-    :return:
+    Args:
+        mom6_input_str (str): Contents of the MOM6 parameter file.
+
+    Returns:
+        str: Fortran namelist.
     """
     return "&mom6\n" + mom6_input_str + "\n/"
 
 
 def _nml_str_to_mom6_input_str(nml_str: str) -> str:
-    """
+    """Convert a Fortran namelist into a MOM6 parameter file.
 
-    :param nml_str:
-    :return:
+    Args:
+        nml_str (str): Fortran namelist.
+
+    Returns:
+        str: MOM6 parameter file.
     """
     lines = nml_str.split("\n")
     lines = lines[1:-2]
@@ -164,10 +175,13 @@ def _nml_str_to_mom6_input_str(nml_str: str) -> str:
 
 
 def _mom6_input_to_nml_str(mom6_input: dict) -> str:
-    """
+    """Convert MOM6 parameters stored in a dictionary into a Fortran namelist.
 
-    :param mom6_input:
-    :return:
+    Args:
+        mom6_input (dict): Dictionary of MOM6 parameters.
+
+    Returns:
+        str: Fortran namelist.
     """
     output_file = StringIO("")
     nml = f90nml.Namelist({"mom6": mom6_input})
@@ -180,10 +194,13 @@ def _mom6_input_to_nml_str(mom6_input: dict) -> str:
 
 
 def _nml_str_to_mom6_input(nml_str: str) -> dict:
-    """
+    """Convert MOM6 parameters stored as a Fortran namelist into a dictionary.
 
-    :param nml_str:
-    :return:
+    Args:
+        nml_str (str): Fortran namelist.
+
+    Returns:
+        dict: Dictionary of MOM6 parameters.
     """
     parser = f90nml.Parser()
     nml = parser.reads(nml_str)
@@ -199,7 +216,7 @@ class Mom6Input(dict):
       - stored all the keys in upper case
       - keep track of the changes done to the original dictionary
 
-    It also stores a "patch" that was applied to the mom6_input_str to convert it to a conforming Fortran namelist.
+    It also stores the "patch" that was applied to the mom6_input_str to convert it to a conforming Fortran namelist.
     This is used to "undo" the changes when writing the file.
     """
 
@@ -213,9 +230,10 @@ class Mom6Input(dict):
     _nml_patch = None
 
     def __init__(self, file_name: str = None):
-        """
+        """Read NOM6 parameters from file.
 
-        :param file_name:
+        Args:
+            file_name (str): Name of file to read.
         """
         # Open file and read contents
         file = Path(file_name)
@@ -238,37 +256,28 @@ class Mom6Input(dict):
         self._nml_patch = {"mom6": {}}
 
     def __setitem__(self, key, value):
-        """
+        """Override method to add item to dict.
 
-        :param key:
-        :param value:
-        :return:
+        This method takes into account that all keys should be stored in uppercase. It also adds the new item to the
+        namelist patch used for round-trip parsing.
         """
         super().__setitem__(key.upper(), value)
         if self._nml_patch:
             self._nml_patch["mom6"][key.upper()] = value
 
     def __getitem__(self, key):
-        """
-
-        :param key:
-        :return:
-        """
+        """Override method to get item from dict, taking into account all keys are stored in uppercase."""
         return super().__getitem__(key.upper())
 
     def __delitem__(self, key):
-        """
-
-        :param key:
-        :return:
-        """
+        """Override method to delete item from dict, so that all keys are stored in uppercase."""
         super().__delitem__(key.upper())
 
     def write(self, file: Path):
-        """
+        """Write contents of MOM6Input to a file.
 
-        :param file:
-        :return:
+        Args:
+            file (Path): File to write to.
         """
         # Streams to pass to f90nml
         nml_file = StringIO(_mom6_input_str_to_nml_str(self._mom6_input_str_patched))
@@ -280,30 +289,30 @@ class Mom6Input(dict):
         file.write_text(mom6_input_str)
 
     def _keys_to_upper(self):
-        """
-
-        :return:
-        """
+        """Change all keys in dictionary to uppercase."""
         for key in list(self.keys()):
             if not key.isupper():
                 self[key.upper()] = self.pop(key)
 
 
 def read_mom6_input(file_name: str) -> Mom6Input:
-    """
+    """Read the contents of a MOM6 parameter file and return its contents as an instance of the MOM6Input class.
 
-    :param file_name:
-    :return:
+    Args:
+        file_name: Name of MOM6 parameter file to read.
+
+    Returns:
+        MOM6Input: Contents of parameter file.
     """
     return Mom6Input(file_name)
 
 
 def write_mom6_input(mom_input: [dict | Mom6Input], file: Path):
-    """
+    """Write MOM6 parameters stored either as a dict of a MOM6Input to a file.
 
-    :param mom_input:
-    :param file:
-    :return:
+    Args:
+        mom_input (dict|MOM6Input): MOM6 parameters.
+        file (Path): File to write to.
     """
     if isinstance(mom_input, Mom6Input):
         mom_input.write(file)
