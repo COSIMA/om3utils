@@ -33,7 +33,7 @@ test = [
 ]
 
 [tool.pytest.ini_options]
-addopts = ["--cov=om3utils", "--cov-report=term", "--cov-report=xml"]
+addopts = ["--cov=om3utils", "--cov-report=term", "--cov-report=html", "--cov-report=xml"]
 testpaths = ["tests"]
 
 [tool.coverage.run]
