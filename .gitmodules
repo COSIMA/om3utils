@@ -1,0 +1,6 @@
+[submodule "grid_generators/esmgrids"]
+	path = grid_generators/esmgrids
+	url = https://github.com/COSIMA/esmgrids.git
+[submodule "grid_generators/ocean_model_grid_generator"]
+	path = grid_generators/ocean_model_grid_generator
+	url = https://github.com/nikizadehgfdl/ocean_model_grid_generator.git

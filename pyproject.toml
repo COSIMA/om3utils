@@ -9,6 +9,9 @@ dynamic = ["version"]
 dependencies = [
     "f90nml",
     "ruamel.yaml",
+    "numpypi",
+    "xarray",
+    "numpy"
 ]
 
 [build-system]
