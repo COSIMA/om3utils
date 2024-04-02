@@ -1,5 +1,5 @@
 class MockFile:
-    """Class for testing parsers that require a file.
+    """Class for testing parsers that require a text file.
 
     Usage:
     @pytest.fixture
