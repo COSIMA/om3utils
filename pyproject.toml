@@ -14,7 +14,7 @@ dependencies = [
     "netcdf4",
     "pyproj",
     "shapely",
-    "scipy"
+    "numpypi@git+https://github.com/underwoo/numpypi#egg=a79f1b53ab122340ea31ee487def8d6011224c31"
 ]
 
 [build-system]
