@@ -11,7 +11,8 @@ dependencies = [
     "ruamel.yaml",
     "xarray",
     "numpy",
-    "netcdf4"
+    "netcdf4",
+    "pyproj"
 ]
 
 [build-system]
