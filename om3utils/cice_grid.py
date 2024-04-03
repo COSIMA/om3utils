@@ -8,8 +8,9 @@ python cice_grid.py <ocean_hgrid> <ocean_hgrid>
 - ocean_hgrid: Path to the MOM super grid NetCDF file.
 - ocean_mask: Path to the corresponding mask NetCDF file.
 
-Dependencies: Developed using 
-'module use /g/data/hh5/public/modules ; module load conda/analysis3-23.10'
+Dependencies: 
+- 'module use /g/data/hh5/public/modules ; module load conda/analysis3-23.10'.
+- or 'pyproject.toml' file
 
 """
 
