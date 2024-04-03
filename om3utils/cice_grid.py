@@ -69,12 +69,13 @@ class CiceGridNc:
 
 
 if __name__ == "__main__":
+    #command line arguments
     from utils import md5sum # load from file
 
     parser = argparse.ArgumentParser()
     parser.add_argument("ocean_hgrid", help="ocean_hgrid.nc file")
     parser.add_argument("ocean_mask", help="ocean_mask.nc file")
-    # to-do: add argument for CRS?
+    # to-do: add argument for CRS & output filenames?
 
     args = vars(parser.parse_args())
 
