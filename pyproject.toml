@@ -12,9 +12,7 @@ dependencies = [
     "xarray",
     "numpy",
     "netcdf4",
-    "pyproj",
-    "shapely",
-    "numpypi@git+https://github.com/underwoo/numpypi@a79f1b53ab122340ea31ee487def8d6011224c31",
+    "ocean_model_grid_generator@git+https://github.com/nikizadehgfdl/ocean_model_grid_generator@790069b31f9791864ccd514a2b8f53f385a0452e",
     "esmgrids@git+https://github.com/anton-seaice/esmgrids@0a563c2916674a6a963140c2cbf1c9c6ebfee1c7",
 ]
 

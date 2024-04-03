@@ -2,12 +2,9 @@ import pytest
 import xarray as xr
 from numpy.testing import assert_allclose
 from numpy import deg2rad
-from os import popen
+from subprocess import run
 
 from om3utils.cice_grid import cice_grid_nc
-from ocean_model_grid_generator.ocean_grid_generator import main as ocean_grid_generator
-
-import warnings
 
 # ----------------
 # test data:
@@ -29,10 +26,8 @@ class MomGrid:
             "gridfilename": self.path,
         }
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            ocean_grid_generator(**args)  # generates ocean_hgrid.nc
-
+        run(["ocean_grid_generator.py", "-r", "0.25", "--no_south_cap", "--ensure_nj_even", "-f", self.path])
+        
         # open ocean_hgrid.nc
         self.ds = xr.open_dataset(self.path)
 
@@ -188,7 +183,8 @@ def test_inputs_logged(cice_grid, mom_grid):
         assert hasattr(ds, "inputfile"), "inputfile attribute missing"
         assert hasattr(ds, "inputfile_md5"), "inputfile md5sum attribute missing"
 
-        sys_md5 = popen(f'md5sum {ds.inputfile} | cut -f 1 -d " "').read().strip()
+        sys_md5 = run(['md5sum', ds.inputfile],capture_output=True, text=True)
+        sys_md5 = sys_md5.stdout.split(" ")[0]
         assert ds.inputfile_md5 == sys_md5, f"inputfile md5sum attribute incorrect, {ds.inputfile_md5} != {sys_md5}"
 
     assert cice_grid.ds.inputfile == mom_grid.path, "inputfile attribute incorrect ({cice_grid.ds.inputfile})"
