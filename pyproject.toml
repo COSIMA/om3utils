@@ -10,7 +10,8 @@ dependencies = [
     "f90nml",
     "ruamel.yaml",
     "xarray",
-    "numpy"
+    "numpy",
+    "netcdf4"
 ]
 
 [build-system]
