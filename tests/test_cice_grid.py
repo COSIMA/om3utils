@@ -2,13 +2,7 @@ import pytest
 import xarray as xr
 from numpy.testing import assert_allclose
 from numpy import deg2rad
-
-# im not sure how micael is importing om3utils?
-import sys
-import os
-
-my_dir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(my_dir, ".."))
+from os import popen
 
 from om3utils.cice_grid import cice_grid_nc
 from ocean_model_grid_generator.ocean_grid_generator import main as ocean_grid_generator
@@ -39,9 +33,10 @@ class MomGrid:
             warnings.simplefilter("ignore", category=RuntimeWarning)
             ocean_grid_generator(**args)  # generates ocean_hgrid.nc
 
+        # open ocean_hgrid.nc
         self.ds = xr.open_dataset(self.path)
 
-        # an ocean mask with a random mask
+        # an ocean mask with a arbitrary mask
         self.mask_ds = xr.Dataset()
         self.mask_ds["mask"] = (self.ds.area.coarsen(ny=2).sum().coarsen(nx=2).sum()) > 5e9
         self.mask_ds.to_netcdf(self.mask_path)
@@ -57,6 +52,17 @@ class CiceGrid:
         cice_grid.build_from_mom(mom_grid.path, mom_grid.mask_path)
         self.ds = xr.open_dataset(self.path, decode_cf=False)
         self.kmt_ds = xr.open_dataset(self.kmt_path, decode_cf=False)
+
+
+# pytest doesn't support class fixtures, so we need these two constructor funcs
+@pytest.fixture
+def mom_grid(tmp_path):
+    return MomGrid(tmp_path)
+
+
+@pytest.fixture
+def cice_grid(mom_grid, tmp_path):
+    return CiceGrid(mom_grid, tmp_path)
 
 
 @pytest.fixture
@@ -101,17 +107,6 @@ def test_grid_ds(mom_grid, tmp_path):
     return test_grid
 
 
-# pytest doesn't support class fixtures, so we need these two constructor funcs
-@pytest.fixture
-def mom_grid(tmp_path):
-    return MomGrid(tmp_path)
-
-
-@pytest.fixture
-def cice_grid(mom_grid, tmp_path):
-    return CiceGrid(mom_grid, tmp_path)
-
-
 # ----------------
 # the tests in earnest:
 
@@ -126,10 +121,6 @@ def test_cice_var_list(cice_grid, test_grid_ds):
 def test_cice_grid(cice_grid, test_grid_ds):
     # Test : Is the data the same as the test_grid
     for jVar in test_grid_ds.variables:
-        anom = cice_grid.ds[jVar].values - test_grid_ds[jVar].values
-
-        print(f"{jVar} anom min: {anom.min()}, anom max: {anom.max()}")
-
         assert_allclose(cice_grid.ds[jVar], test_grid_ds[jVar], rtol=1e-13, verbose=True, err_msg=f"{jVar} mismatch")
 
 
@@ -138,7 +129,7 @@ def test_cice_kmt(mom_grid, cice_grid):
     mask = mom_grid.mask_ds.mask
     kmt = cice_grid.kmt_ds.kmt
 
-    assert_allclose(mask, kmt, rtol=1e-13, verbose=True, err_msg=f"mask mismatch")
+    assert_allclose(mask, kmt, rtol=1e-13, verbose=True, err_msg="mask mismatch")
 
 
 def test_cice_grid_attributes(cice_grid):
@@ -197,7 +188,7 @@ def test_inputs_logged(cice_grid, mom_grid):
         assert hasattr(ds, "inputfile"), "inputfile attribute missing"
         assert hasattr(ds, "inputfile_md5"), "inputfile md5sum attribute missing"
 
-        sys_md5 = os.popen(f'md5sum {ds.inputfile} | cut -f 1 -d " "').read().strip()
+        sys_md5 = popen(f'md5sum {ds.inputfile} | cut -f 1 -d " "').read().strip()
         assert ds.inputfile_md5 == sys_md5, f"inputfile md5sum attribute incorrect, {ds.inputfile_md5} != {sys_md5}"
 
     assert cice_grid.ds.inputfile == mom_grid.path, "inputfile attribute incorrect ({cice_grid.ds.inputfile})"

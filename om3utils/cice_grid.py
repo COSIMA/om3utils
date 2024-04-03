@@ -17,11 +17,7 @@ Dependencies: Developed using
 # File based on https://github.com/COSIMA/access-om2/blob/29118914d5224152ce286e0590394b231fea632e/tools/make_cice_grid.py
 
 import sys
-import os
 import argparse
-
-my_dir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(my_dir, "esmgrids"))
 
 from esmgrids.mom_grid import MomGrid
 from esmgrids.cice_grid import CiceGrid

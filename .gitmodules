@@ -1,6 +1,0 @@
-[submodule "om3utils/esmgrids"]
-	path = om3utils/esmgrids
-	url = https://github.com/COSIMA/esmgrids.git
-[submodule "tests/ocean_model_grid_generator"]
-	path = tests/ocean_model_grid_generator
-	url = https://github.com/nikizadehgfdl/ocean_model_grid_generator.git
