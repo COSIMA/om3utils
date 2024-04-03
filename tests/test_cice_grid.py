@@ -27,7 +27,7 @@ class MomGrid:
         }
 
         run(["ocean_grid_generator.py", "-r", "0.25", "--no_south_cap", "--ensure_nj_even", "-f", self.path])
-        
+
         # open ocean_hgrid.nc
         self.ds = xr.open_dataset(self.path)
 
@@ -183,7 +183,7 @@ def test_inputs_logged(cice_grid, mom_grid):
         assert hasattr(ds, "inputfile"), "inputfile attribute missing"
         assert hasattr(ds, "inputfile_md5"), "inputfile md5sum attribute missing"
 
-        sys_md5 = run(['md5sum', ds.inputfile],capture_output=True, text=True)
+        sys_md5 = run(["md5sum", ds.inputfile], capture_output=True, text=True)
         sys_md5 = sys_md5.stdout.split(" ")[0]
         assert ds.inputfile_md5 == sys_md5, f"inputfile md5sum attribute incorrect, {ds.inputfile_md5} != {sys_md5}"
 
