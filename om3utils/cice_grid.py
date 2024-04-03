@@ -8,46 +8,47 @@ python cice_grid.py <ocean_hgrid> <ocean_hgrid>
 - ocean_hgrid: Path to the MOM super grid NetCDF file.
 - ocean_mask: Path to the corresponding mask NetCDF file.
 
-"""
+Dependencies: Developed using 
+'module use /g/data/hh5/public/modules ; module load conda/analysis3-23.10'
 
+"""
 
 #!/usr/bin/env python3
 # File based on https://github.com/COSIMA/access-om2/blob/29118914d5224152ce286e0590394b231fea632e/tools/make_cice_grid.py
 
 import sys
-# import os
+import os
 import argparse
 
-# my_dir = os.path.dirname(os.path.realpath(__file__))
-# sys.path.append(os.path.join(my_dir, 'esmgrids'))
+my_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(my_dir, 'esmgrids'))
 
-# print(sys.path)
+from esmgrids.mom_grid import MomGrid
+from esmgrids.cice_grid import CiceGrid
 
-from .esmgrids.esmgrids.mom_grid import MomGrid  # noqa
-from .esmgrids.esmgrids.cice_grid import CiceGrid  # noqa
-from .utils import Md5sum
-
-class cice_grid_from_mom() :
+class cice_grid_nc:
 
     """
     Create CICE grid.nc and kmt.nc from MOM ocean_hgrid.nc and ocean_mask.nc
     """
 
-    def run(self, ocean_hgrid, ocean_mask):
+    def __init__(self, grid_file='grid.nc', mask_file='kmt.nc'):
+        self.grid_file=grid_file
+        self.mask_file=mask_file
+        return
+
+    def build_from_mom(self, ocean_hgrid, ocean_mask):
 
     
         mom = MomGrid.fromfile(ocean_hgrid, mask_file=ocean_mask)
 
         cice = CiceGrid.fromgrid(mom)
-
-        # grid_file = os.path.join('grid.nc')
-        # mask_file = os.path.join('kmt.nc')
-
-        cice.create_gridnc('grid.nc')
+       
+        cice.create_gridnc(self.grid_file)
 
         # Add versioning information    
         cice.grid_f.inputfile = f"{ocean_hgrid}"
-        cice.grid_f.inputfile_md5 = Md5sum(ocean_hgrid).sum
+        cice.grid_f.inputfile_md5 = md5sum(ocean_hgrid)
         cice.grid_f.history_command = f"python make_CICE_grid.py {ocean_hgrid} {ocean_mask}"
 
         #Add the typical crs (i.e. WGS84/EPSG4326 , but in radians).
@@ -57,12 +58,12 @@ class cice_grid_from_mom() :
 
         cice.write()
 
-        cice.create_masknc('kmt.nc')
+        cice.create_masknc(self.mask_file)
 
         # Add versioning information    
         cice.mask_f.inputfile = f"{ocean_mask}"
-        cice.mask_f.inputfile_md5 = Md5sum(ocean_mask).sum
-        cice.mask_f.history_command = f"python make_CICE_grid.py {ocean_hgrid} {ocean_mask}"
+        cice.mask_f.inputfile_md5 = md5sum(ocean_mask)
+        cice.mask_f.history_command = f"python cice_grid.py {ocean_hgrid} {ocean_mask}"
 
         #Add the typical crs (i.e. WGS84/EPSG4326 , but in radians).
         crs = cice.mask_f.createVariable('crs', 'S1')
@@ -73,13 +74,20 @@ class cice_grid_from_mom() :
 
 if __name__ == '__main__':
 
+    from utils import md5sum
+
     parser = argparse.ArgumentParser()
     parser.add_argument('ocean_hgrid', help='ocean_hgrid.nc file')
     parser.add_argument('ocean_mask', help='ocean_mask.nc file')
-    #add argument for CRS?
+    #to-do: add argument for CRS?
 
     args = vars(parser.parse_args())
 
-    grid = cice_grid_from_mom()
+    grid = cice_grid_nc()
 
-    sys.exit(grid.run(**args))
+    sys.exit(grid.build_from_mom(**args))
+
+else:
+    #for testing
+    from .utils import md5sum
+

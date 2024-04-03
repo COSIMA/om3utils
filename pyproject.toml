@@ -38,6 +38,7 @@ test = [
 [tool.pytest.ini_options]
 addopts = ["--cov=om3utils", "--cov-report=term", "--cov-report=xml"]
 testpaths = ["tests"]
+norecursedirs = ["tests/ocean_model_grid_generator"]
 
 [tool.coverage.run]
 omit = ["om3utils/__init__.py", "om3utils/_version.py"]
