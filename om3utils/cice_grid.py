@@ -23,7 +23,7 @@ from esmgrids.mom_grid import MomGrid
 from esmgrids.cice_grid import CiceGrid
 
 
-class cice_grid_nc:
+class CiceGridNc:
     """
     Create CICE grid.nc and kmt.nc from MOM ocean_hgrid.nc and ocean_mask.nc
     """
@@ -68,7 +68,7 @@ class cice_grid_nc:
 
 
 if __name__ == "__main__":
-    from utils import md5sum
+    from utils import md5sum # load from file
 
     parser = argparse.ArgumentParser()
     parser.add_argument("ocean_hgrid", help="ocean_hgrid.nc file")
@@ -77,10 +77,9 @@ if __name__ == "__main__":
 
     args = vars(parser.parse_args())
 
-    grid = cice_grid_nc()
+    grid = CiceGridNc()
 
     sys.exit(grid.build_from_mom(**args))
 
 else:
-    # for testing
-    from .utils import md5sum
+    from .utils import md5sum #load from package

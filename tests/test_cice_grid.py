@@ -4,7 +4,7 @@ from numpy.testing import assert_allclose
 from numpy import deg2rad
 from subprocess import run
 
-from om3utils.cice_grid import cice_grid_nc
+from om3utils.cice_grid import CiceGridNc
 
 # ----------------
 # test data:
@@ -18,15 +18,13 @@ class MomGrid:
         self.mask_path = str(tmp_path) + "/ocean_mask.nc"
 
         # generate an tripolar grid as test data
-        args = {
-            "inverse_resolution": 0.25,  # 4 degree grid
-            "no_south_cap": True,
-            "ensure_nj_even": True,
-            "match_dy": ["bp", "so", "p125sc", ""],
-            "gridfilename": self.path,
-        }
-
-        run(["ocean_grid_generator.py", "-r", "0.25", "--no_south_cap", "--ensure_nj_even", "-f", self.path])
+        run([
+            "ocean_grid_generator.py", 
+            "-r", "0.25", #4 degree grid
+            "--no_south_cap", 
+            "--ensure_nj_even",
+            "-f", self.path
+        ])
 
         # open ocean_hgrid.nc
         self.ds = xr.open_dataset(self.path)
@@ -43,7 +41,7 @@ class CiceGrid:
     def __init__(self, mom_grid, tmp_path):
         self.path = str(tmp_path) + "/grid.nc"
         self.kmt_path = str(tmp_path) + "/kmt.nc"
-        cice_grid = cice_grid_nc(self.path, self.kmt_path)
+        cice_grid = CiceGridNc(self.path, self.kmt_path)
         cice_grid.build_from_mom(mom_grid.path, mom_grid.mask_path)
         self.ds = xr.open_dataset(self.path, decode_cf=False)
         self.kmt_ds = xr.open_dataset(self.kmt_path, decode_cf=False)
@@ -61,7 +59,7 @@ def cice_grid(mom_grid, tmp_path):
 
 
 @pytest.fixture
-def test_grid_ds(mom_grid, tmp_path):
+def test_grid_ds(mom_grid):
     # this generates the expected answers
 
     ds = mom_grid.ds
@@ -187,7 +185,5 @@ def test_inputs_logged(cice_grid, mom_grid):
         sys_md5 = sys_md5.stdout.split(" ")[0]
         assert ds.inputfile_md5 == sys_md5, f"inputfile md5sum attribute incorrect, {ds.inputfile_md5} != {sys_md5}"
 
-    assert cice_grid.ds.inputfile == mom_grid.path, "inputfile attribute incorrect ({cice_grid.ds.inputfile})"
-    assert (
-        cice_grid.kmt_ds.inputfile == mom_grid.mask_path
-    ), "mask inputfile attribute incorrect ({cice_grid.kmt_ds.inputfile})"
+    assert cice_grid.ds.inputfile == mom_grid.path, "inputfile attribute incorrect ({cice_grid.ds.inputfile} != {mom_grid.path})"
+    assert cice_grid.kmt_ds.inputfile == mom_grid.mask_path, "mask inputfile attribute incorrect ({cice_grid.kmt_ds.inputfile} != {mom_grid.mask_path})"
