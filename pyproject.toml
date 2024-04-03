@@ -13,7 +13,7 @@ dependencies = [
     "numpy",
     "netcdf4",
     "ocean_model_grid_generator@git+https://github.com/nikizadehgfdl/ocean_model_grid_generator@790069b31f9791864ccd514a2b8f53f385a0452e",
-    "esmgrids@git+https://github.com/anton-seaice/esmgrids@53e336d90cf6aad386721df574e8f9d33f820806",
+    "esmgrids@git+https://github.com/anton-seaice/esmgrids@e5791f17a699627566687021e250aac32567ecd4",
 ]
 
 [build-system]
