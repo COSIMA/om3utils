@@ -28,7 +28,6 @@ from esmgrids.cice_grid import CiceGrid
 
 
 class cice_grid_nc:
-
     """
     Create CICE grid.nc and kmt.nc from MOM ocean_hgrid.nc and ocean_mask.nc
     """

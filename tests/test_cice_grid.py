@@ -20,7 +20,6 @@ import warnings
 
 
 class MomGrid:
-
     """Generate a sample tripole grid to use as test data"""
 
     def __init__(self, tmp_path):
