@@ -12,7 +12,8 @@ dependencies = [
     "xarray",
     "numpy",
     "netcdf4",
-    "pyproj"
+    "pyproj",
+    "shapely"
 ]
 
 [build-system]
