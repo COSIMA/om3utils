@@ -18,13 +18,17 @@ class MomGrid:
         self.mask_path = str(tmp_path) + "/ocean_mask.nc"
 
         # generate an tripolar grid as test data
-        run([
-            "ocean_grid_generator.py", 
-            "-r", "0.25", #4 degree grid
-            "--no_south_cap", 
-            "--ensure_nj_even",
-            "-f", self.path
-        ])
+        run(
+            [
+                "ocean_grid_generator.py",
+                "-r",
+                "0.25",  # 4 degree grid
+                "--no_south_cap",
+                "--ensure_nj_even",
+                "-f",
+                self.path,
+            ]
+        )
 
         # open ocean_hgrid.nc
         self.ds = xr.open_dataset(self.path)
@@ -185,5 +189,9 @@ def test_inputs_logged(cice_grid, mom_grid):
         sys_md5 = sys_md5.stdout.split(" ")[0]
         assert ds.inputfile_md5 == sys_md5, f"inputfile md5sum attribute incorrect, {ds.inputfile_md5} != {sys_md5}"
 
-    assert cice_grid.ds.inputfile == mom_grid.path, "inputfile attribute incorrect ({cice_grid.ds.inputfile} != {mom_grid.path})"
-    assert cice_grid.kmt_ds.inputfile == mom_grid.mask_path, "mask inputfile attribute incorrect ({cice_grid.kmt_ds.inputfile} != {mom_grid.mask_path})"
+    assert (
+        cice_grid.ds.inputfile == mom_grid.path
+    ), "inputfile attribute incorrect ({cice_grid.ds.inputfile} != {mom_grid.path})"
+    assert (
+        cice_grid.kmt_ds.inputfile == mom_grid.mask_path
+    ), "mask inputfile attribute incorrect ({cice_grid.kmt_ds.inputfile} != {mom_grid.mask_path})"

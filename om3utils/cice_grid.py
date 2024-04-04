@@ -69,8 +69,8 @@ class CiceGridNc:
 
 
 if __name__ == "__main__":
-    #command line arguments
-    from utils import md5sum # load from file
+    # command line arguments
+    from utils import md5sum  # load from file
 
     parser = argparse.ArgumentParser()
     parser.add_argument("ocean_hgrid", help="ocean_hgrid.nc file")
@@ -84,4 +84,4 @@ if __name__ == "__main__":
     sys.exit(grid.build_from_mom(**args))
 
 else:
-    from .utils import md5sum #load from package
+    from .utils import md5sum  # load from package
