@@ -7,3 +7,4 @@
 Collection of utilities aimed at simplifying the creation and handling of ACCESS-OM3 runs. It currently includes:
   - functions to read and write ACCESS-OM3 configuration files
   - functions to read and process profiling data
+  - scripts to create the CICE grid file from an existing MOM grid file
