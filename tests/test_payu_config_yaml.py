@@ -6,7 +6,7 @@ from om3utils.payu_config_yaml import read_payu_config_yaml, write_payu_config_y
 
 
 @pytest.fixture()
-def simple_payu_config(tmp_path):
+def simple_payu_config():
     return {
         "project": "x77",
         "ncpus": 48,
