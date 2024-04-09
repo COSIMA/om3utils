@@ -47,6 +47,7 @@ N_SMOOTH = 4
 DT = 1800.0  ! This is a comment
 ! This is another comment
 !COMMENTED_VAR = 3
+TO_BE_REMOVED = 10.0 
 BOOL = True
 """
     return MockFile(file, mom6_input_str)
@@ -72,7 +73,7 @@ DT = 900.0  ! This is a comment
 BOOL = True
 
 
-added_var = 32
+ADDED_VAR = 32
 """
     return MockFile(file, mom6_input_str)
 
@@ -94,8 +95,10 @@ def test_round_trip_mom6_input(tmp_path, complex_mom6_input_file, modified_mom6_
     mom6_input_from_file = Mom6Input(file_name=complex_mom6_input_file.file)
     mom6_input_from_file["dt"] = 900.0
     mom6_input_from_file["ADDED_VAR"] = 1
-    del mom6_input_from_file["ADDED_VAR"]
     mom6_input_from_file["ADDED_VAR"] = 32
+    del mom6_input_from_file["N_SMOOTH"]
+    mom6_input_from_file["N_SMOOTH"] = 4
+    del mom6_input_from_file["TO_BE_REMOVED"]
 
     write_mom6_input(mom6_input_from_file, tmp_path / "MOM_input_new")
 

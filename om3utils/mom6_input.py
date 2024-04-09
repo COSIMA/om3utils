@@ -79,7 +79,7 @@ def _patch_mom6_input_str(mom6_input_str: str) -> tuple[str, dict]:
     block_pattern = re.compile(r"KPP%|%KPP|CVMix_CONVECTION%|%CVMix_CONVECTION|CVMIX_DDIFF%|%CVMIX_DDIFF")
     override_directive_pattern = re.compile(r"^(#override\s*?)")
     incorrect_directive_pattern = re.compile(r"^(#\s+)")
-    comment_directive_pattern = re.compile(r"^#(?:(?!override)\w+\b\s*=\s*\w+$)")
+    comment_directive_pattern = re.compile(r"^#((?!override)\w+\b\s*=\s*\w+$)")
 
     # Modify the input while recording the changes
     patch = {}
@@ -229,6 +229,9 @@ class Mom6Input(dict):
     # A record of all the changes done to the dictionary that can be passed to f90nml to do round-trip parsing
     _nml_patch = None
 
+    # A record of keys that have been deleted from the dictionary
+    _deleted_keys = []
+
     def __init__(self, file_name: str = None):
         """Read NOM6 parameters from file.
 
@@ -262,6 +265,10 @@ class Mom6Input(dict):
         namelist patch used for round-trip parsing.
         """
         super().__setitem__(key.upper(), value)
+
+        if key.upper() in self._deleted_keys:
+            self._deleted_keys.remove(key.upper())
+
         if self._nml_patch:
             self._nml_patch["mom6"][key.upper()] = value
 
@@ -271,6 +278,7 @@ class Mom6Input(dict):
 
     def __delitem__(self, key):
         """Override method to delete item from dict, so that all keys are stored in uppercase."""
+        self._deleted_keys.append(key.upper())
         super().__delitem__(key.upper())
 
     def write(self, file: Path):
@@ -286,6 +294,15 @@ class Mom6Input(dict):
         parser = f90nml.Parser()
         parser.read(nml_file, self._nml_patch, tmp_file)
         mom6_input_str = _unpatch_mom6_input_str(tmp_file.getvalue(), self._file_patch)
+
+        # Change keys to uppercase using a regex substitution, as there seems to be no way of doing this with f90nml
+        # when applying a nml patch.
+        mom6_input_str = re.sub(r"((?<=^)|(?<=\n))(\w+)", lambda pat: pat.group(2).upper(), mom6_input_str)
+
+        # Explicitly removed keys from string
+        for key in self._deleted_keys:
+            mom6_input_str = re.sub(r"\s*" + f"{key}" + r"\s*=\s*\S*\s*\n", r"\n", mom6_input_str)
+
         file.write_text(mom6_input_str)
 
     def _keys_to_upper(self):
