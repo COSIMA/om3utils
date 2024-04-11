@@ -17,7 +17,7 @@ class MomGrid:
         self.path = str(tmp_path) + "/ocean_hgrid.nc"
         self.mask_path = str(tmp_path) + "/ocean_mask.nc"
 
-        # generate an tripolar grid as test data
+        # generate a tripolar grid as test data
         run(
             [
                 "ocean_grid_generator.py",
@@ -84,15 +84,14 @@ def test_grid_ds(mom_grid):
 
     # angle at u point
     test_grid["angle"] = deg2rad(ds.angle_dx.isel(nyp=slice(2, None, 2), nxp=slice(2, None, 2)))
-    # angle a t points
+    # angle at t points
     test_grid["angleT"] = deg2rad(ds.angle_dx.isel(nyp=slice(1, None, 2), nxp=slice(1, None, 2)))
 
     # area of cells
-    test_grid["tarea"] = mom_grid.ds.area.coarsen(ny=2).sum().coarsen(nx=2).sum()
+    test_grid["tarea"] =ds.area.coarsen(ny=2).sum().coarsen(nx=2).sum()
 
     # uarea is area of a cell centred around the u point
     # we need to wrap in latitude and fold on longitude to calculate this
-    area_wrapped = mom_grid.ds.area
     area_wrapped = xr.concat([ds.area.isel(nx=slice(1, None)), ds.area.isel(nx=0)], dim="nx")
 
     top_row = xr.concat([ds.area.isel(ny=-1, nx=slice(-2, 0, -1)), ds.area.isel(ny=-1, nx=[-1, 0])], dim="nx")
