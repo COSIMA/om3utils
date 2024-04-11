@@ -9,7 +9,7 @@ python cice_grid.py <ocean_hgrid> <ocean_hgrid>
 - ocean_mask: Path to the corresponding mask NetCDF file.
 
 Dependencies: 
-- 'module use /g/data/hh5/public/modules ; module load conda/analysis3-23.10'.
+- 'module use /g/data/hh5/public/modules ; module load conda/analysis3-23.10' + pip install esmgrids
 - or 'pyproject.toml' file
 
 """

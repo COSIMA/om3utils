@@ -65,40 +65,43 @@ def cice_grid(mom_grid, tmp_path):
 @pytest.fixture
 def test_grid_ds(mom_grid):
     # this generates the expected answers
+    # In simple terms the MOM supergrid has four cells for each model grid cell. The MOM supergrid includes all edges (left and right) but CICE only uses right/east edges. (e.g. For points/edges of first cell: 0,0 is SW corner, 1,1 is middle of cell, 2,2, is NE corner/edges)
 
     ds = mom_grid.ds
 
+    # u points are at top-right (NE) corner
+    u_points = ds.isel(nxp=slice(2, None, 2), nyp=slice(2, None, 2))
+
+    # t points are in middle of cell
+    t_points = ds.isel(nxp=slice(1, None, 2), nyp=slice(1, None, 2))
+
     test_grid = xr.Dataset()
-    # corners of the cice grid are NE corner
-    test_grid["ulat"] = deg2rad(ds.y.isel(nxp=slice(2, None, 2), nyp=slice(2, None, 2)))
-    test_grid["ulon"] = deg2rad(ds.x.isel(nxp=slice(2, None, 2), nyp=slice(2, None, 2)))
 
-    # centers of cice grid
-    test_grid["tlat"] = deg2rad(ds.y.isel(nxp=slice(1, None, 2), nyp=slice(1, None, 2)))
-    test_grid["tlon"] = deg2rad(ds.x.isel(nxp=slice(1, None, 2), nyp=slice(1, None, 2)))
+    test_grid["ulat"] = deg2rad(u_points.y)
+    test_grid["ulon"] = deg2rad(u_points.x)
+    test_grid["tlat"] = deg2rad(t_points.y)
+    test_grid["tlon"] = deg2rad(t_points.x)
 
-    # length of top edge of cells
+    test_grid["angle"] = deg2rad(u_points.angle_dx)  # angle at u point
+    test_grid["angleT"] = deg2rad(t_points.angle_dx)
+
+    # length of top (northern) edge of cells
     test_grid["htn"] = ds.dx.isel(nyp=slice(2, None, 2)).coarsen(nx=2).sum() * 100
-    # length of right edge of cells
+    # length of right (eastern) edge of cells
     test_grid["hte"] = ds.dy.isel(nxp=slice(2, None, 2)).coarsen(ny=2).sum() * 100
 
-    # angle at u point
-    test_grid["angle"] = deg2rad(ds.angle_dx.isel(nyp=slice(2, None, 2), nxp=slice(2, None, 2)))
-    # angle at t points
-    test_grid["angleT"] = deg2rad(ds.angle_dx.isel(nyp=slice(1, None, 2), nxp=slice(1, None, 2)))
-
     # area of cells
-    test_grid["tarea"] =ds.area.coarsen(ny=2).sum().coarsen(nx=2).sum()
+    test_grid["tarea"] = ds.area.coarsen(ny=2).sum().coarsen(nx=2).sum()
 
     # uarea is area of a cell centred around the u point
-    # we need to wrap in latitude and fold on longitude to calculate this
-    area_wrapped = xr.concat([ds.area.isel(nx=slice(1, None)), ds.area.isel(nx=0)], dim="nx")
+    # we need to fold on longitude and wrap in latitude to calculate this
+    # drop the bottom row, new top row is reverse of current top row
+    area_folded = xr.concat([ds.area.isel(ny=slice(1, None)), ds.area.isel(ny=-1, nx=slice(-1, None, -1))], dim="ny")
 
-    top_row = xr.concat([ds.area.isel(ny=-1, nx=slice(-2, 0, -1)), ds.area.isel(ny=-1, nx=[-1, 0])], dim="nx")
+    # drop the first column, make the new last column the first column
+    area_wrapped = xr.concat([area_folded.isel(nx=slice(1, None)), area_folded.isel(nx=0)], dim="nx")
 
-    area_folded = xr.concat([area_wrapped.isel(ny=slice(1, None)), top_row], dim="ny")
-
-    test_grid["uarea"] = area_folded.coarsen(ny=2).sum().coarsen(nx=2).sum()
+    test_grid["uarea"] = area_wrapped.coarsen(ny=2).sum().coarsen(nx=2).sum()
 
     return test_grid
 
