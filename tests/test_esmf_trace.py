@@ -1,5 +1,7 @@
 import pytest
 
+bt2 = pytest.importorskip("bt2", reason="Requires babeltrace2 python bindings")
+
 from om3utils.esmf_trace import SinglePETTimingNode, MultiPETTimingNode
 
 

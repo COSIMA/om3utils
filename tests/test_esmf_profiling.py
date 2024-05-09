@@ -1,6 +1,8 @@
 import pytest
 from pathlib import Path
 
+bt2 = pytest.importorskip("bt2", reason="Requires babeltrace2 python bindings")
+
 from om3utils.esmf_profiling import ESMFProfilingParser
 
 
