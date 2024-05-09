@@ -26,6 +26,7 @@ write_to = "om3utils/_version.py"
 devel = [
     "flake8",
     "black",
+    "pre-commit",
 ]
 test = [
     "pytest",
