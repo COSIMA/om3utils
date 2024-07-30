@@ -297,7 +297,7 @@ class Mom6Input(dict):
 
         # Change keys to uppercase using a regex substitution, as there seems to be no way of doing this with f90nml
         # when applying a nml patch.
-        mom6_input_str = re.sub(r"((?<=^)|(?<=\n))(\w+)", lambda pat: pat.group(2).upper(), mom6_input_str)
+        # mom6_input_str = re.sub(r"((?<=^)|(?<=\n))(\w+)", lambda pat: pat.group(2).upper(), mom6_input_str)
 
         # Explicitly removed keys from string
         for key in self._deleted_keys:
