@@ -37,6 +37,7 @@ devel = [
 test = [
     "pytest",
     "pytest-cov",
+    "pytest-mock",
 ]
 
 [tool.pytest.ini_options]
